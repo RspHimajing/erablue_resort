@@ -263,6 +263,8 @@ FOR LOCAL:1, 0, 50
 		弱点コマンド枠:MASTER:(LOCAL:1) = %RESULTS%
 	ENDIF
 NEXT
+;あなたの衣装セット
+CALL CLOTHES_TODAY(MASTER)
 
 ;スイートルーム関係おかしくなってないかチェック
 FOR 部屋番号, 0, VARSIZE("スイートルーム部屋割り配列")
