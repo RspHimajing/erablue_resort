@@ -462,6 +462,7 @@ IF 戦闘行動キャラ >= 10 || アビ汎用変数:敵対心無視オプショ
 			CONTINUE
 		SIF 敵BATTLE_STATE:(敵番号 - 10):ＨＰ < 1
 			CONTINUE
+		;敵が敵を選ぶ場合は潜伏処理は入れない
 		IF デバフ条件 != ""
 			SIF デバフ番号取得(デバフ条件, 敵番号) < 0
 				CONTINUE
@@ -482,6 +483,8 @@ ELSE
 		SIF 敵BATTLE_STATE_STR:(敵番号 - 10):エネミー名 == ""
 			CONTINUE
 		SIF 敵BATTLE_STATE:(敵番号 - 10):ＨＰ < 1
+			CONTINUE
+		SIF バフ存在判定("潜伏", 敵番号)
 			CONTINUE
 		IF デバフ条件 != ""
 			SIF デバフ番号取得(デバフ条件, 敵番号) < 0
@@ -554,11 +557,17 @@ FOR 敵番号, 10, 20
 		CONTINUE
 	SIF 敵BATTLE_STATE:(敵番号 - 10):ＨＰ < 1
 		CONTINUE
+	;味方の行動時、潜伏相手は対象にしない
+	SIF 戦闘行動キャラ < 10 && バフ存在判定("潜伏", 敵番号)
+		CONTINUE
 	IF 比較数値保存 < 敵BATTLE_STATE:(敵番号 - 10):ステータス名
 		比較敵番号 = 敵番号
 		比較数値保存 = 敵BATTLE_STATE:(敵番号 - 10):ステータス名
 	ENDIF
 NEXT
+
+SIF 比較敵番号 == 0
+	RETURN -1
 
 アビテンプレート用_対象保存:0 = 比較敵番号
 SIF アビ汎用文字列:ダメージ種類 == "奥義ダメージ"
@@ -589,11 +598,17 @@ FOR 敵番号, 10, 20
 		CONTINUE
 	SIF 敵BATTLE_STATE:(敵番号 - 10):ＨＰ < 1
 		CONTINUE
+	;味方の行動時、潜伏相手は対象にしない
+	SIF 戦闘行動キャラ < 10 && バフ存在判定("潜伏", 敵番号)
+		CONTINUE
 	IF 比較数値保存 > 敵BATTLE_STATE:(敵番号 - 10):ステータス名
 		比較敵番号 = 敵番号
 		比較数値保存 = 敵BATTLE_STATE:(敵番号 - 10):ステータス名
 	ENDIF
 NEXT
+
+SIF 比較敵番号 == 0
+	RETURN -1
 
 アビテンプレート用_対象保存:0 = 比較敵番号
 SIF アビ汎用文字列:ダメージ種類 == "奥義ダメージ"
@@ -710,6 +725,9 @@ FOR 味方番号, 0, 4
 		CONTINUE
 	SIF BATTLE_STATE:味方番号:ＨＰ < 1
 		CONTINUE
+	;敵の行動時、潜伏相手は対象にしない
+	SIF 戦闘行動キャラ >= 10 && バフ存在判定("潜伏", 味方番号)
+		CONTINUE
 	IF 比較数値保存 < BATTLE_STATE:味方番号:ステータス名
 		比較味方番号 = 味方番号
 		比較数値保存 = BATTLE_STATE:味方番号:ステータス名
@@ -743,6 +761,9 @@ FOR 味方番号, 0, 4
 	SIF BATTLE_STATE:味方番号:キャラ登録番号 < 1
 		CONTINUE
 	SIF BATTLE_STATE:味方番号:ＨＰ < 1
+		CONTINUE
+	;敵の行動時、潜伏相手は対象にしない
+	SIF 戦闘行動キャラ >= 10 && バフ存在判定("潜伏", 味方番号)
 		CONTINUE
 	IF 比較数値保存 > BATTLE_STATE:味方番号:ステータス名
 		比較味方番号 = 味方番号
@@ -865,6 +886,9 @@ ELSE
 		SIF BATTLE_STATE:味方番号:キャラ登録番号 < 1
 			CONTINUE
 		SIF BATTLE_STATE:味方番号:ＨＰ < 1
+			CONTINUE
+		;敵の行動時、潜伏相手は対象にしない
+		SIF バフ存在判定("潜伏", 味方番号)
 			CONTINUE
 		IF デバフ条件 != ""
 			SIF デバフ番号取得(デバフ条件, 味方番号) < 0
