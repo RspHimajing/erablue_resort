@@ -3,8 +3,6 @@
 
 
 
-;0.100
-#DIM SAVEDATA USERCOM表示フォロー
 
 ;0.101
 #DIM SAVEDATA メイデナフォロー
@@ -14,3 +12,5 @@
 #DIM SAVEDATA 舞踏会フォロー
 #DIM SAVEDATA サブリナフォロー
 #DIM SAVEDATA リスリサルフォロー
+
+;0.103
