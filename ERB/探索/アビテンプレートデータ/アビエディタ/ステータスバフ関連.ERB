@@ -400,23 +400,36 @@ PRINTBUTTONLC "[305] 光属性耐性", 305
 PRINTBUTTONLC "[306] 闇属性耐性", 306
 PRINTL
 DRAWLINE
-PRINTL ・その他バフ
-PRINTBUTTONLC "[400] 与回復量", 400
-PRINTBUTTONLC "[401] 被回復量", 401
-PRINTBUTTONLC "[402] テンション", 402
-PRINTBUTTONLC "[403] ストレングス", 403
+PRINTL ・その他攻撃系バフ
+PRINTBUTTONLC "[400] テンション", 400
+PRINTBUTTONLC "[401] ストレングス", 401
+PRINTBUTTONLC "[402] 逆境", 402
+PRINTBUTTONLC "[403] 追撃", 403
 PRINTL
-PRINTBUTTONLC "[404] 逆境", 404
-PRINTBUTTONLC "[405] 再生", 405
-PRINTBUTTONLC "[406] 高揚", 406
-PRINTBUTTONLC "[407] バリア", 407
+PRINTBUTTONLC "[404] 奥義再発動", 404
 PRINTL
-PRINTBUTTONLC "[408] 追撃", 408
-PRINTBUTTONLC "[409] ＨＰ転換", 409
-PRINTBUTTONLC "[410] ＭＰ転換", 410
-PRINTBUTTONLC "[411] 自動復活", 411
+PRINTBUTTONLC "[499] その他攻撃系バフ解説", 499
 PRINTL
-PRINTBUTTONLC "[499] その他バフ解説", 499
+DRAWLINE
+PRINTL ・その他防御系バフ
+PRINTBUTTONLC "[500] 与回復量", 500
+PRINTBUTTONLC "[501] 被回復量", 501
+PRINTBUTTONLC "[502] 再生", 502
+PRINTBUTTONLC "[503] 高揚", 503
+PRINTL
+PRINTBUTTONLC "[504] バリア", 504
+PRINTBUTTONLC "[505] ＨＰ転換", 505
+PRINTBUTTONLC "[506] ＭＰ転換", 506
+PRINTBUTTONLC "[507] 自動復活", 507
+PRINTL
+PRINTBUTTONLC "[508] 弱体無効", 508
+PRINTBUTTONLC "[509] ディスペルガード", 509
+PRINTBUTTONLC "[510] 単体かばう", 510
+PRINTBUTTONLC "[511] 全体かばう", 511
+PRINTL
+PRINTBUTTONLC "[512] 反射", 512
+PRINTL
+PRINTBUTTONLC "[599] ・その他防御系バフ解説", 599
 PRINTL
 DRAWLINE
 PRINTL
@@ -448,37 +461,15 @@ SELECTCASE RESULT
 	CASE 301 TO 306
 		バフ対象能力 = 属性被ダメージ_%属性数値文字列変換(RESULT - 301)%
 	CASE 400
-		バフ対象能力 = 与回復量
-	CASE 401
-		バフ対象能力 = 被回復量
-	CASE 402
 		バフ対象能力 = テンション
-	CASE 403
+	CASE 401
 		バフ対象能力 = ストレングス
-	CASE 404
+	CASE 402
 		バフ対象能力 = 逆境
-	CASE 405
-		バフ対象能力 = 再生
-	CASE 406
-		バフ対象能力 = 高揚
-	CASE 407
-		バフ対象能力 = バリア
-	CASE 408
+	CASE 403
 		バフ対象能力 = 追撃
-	; CASE 409
-	; 	バフ対象能力 = ＨＰ転換
-	; CASE 410
-	; 	バフ対象能力 = ＭＰ転換
-	; CASE 411
-	; 	バフ対象能力 = 自動復活
 	CASE 499
 		DRAWLINE
-		PRINTL ・与回復量
-		PRINTL 　　効果の掛かったキャラが使用する回復効果が上下します。
-		PRINTL
-		PRINTL ・被回復量
-		PRINTL 　　効果の掛かったキャラが受ける回復効果が上下します。
-		PRINTL
 		PRINTL ・テンション
 		PRINTL 　　攻撃力を上昇させます。４段階存在し、同じ効果を掛けるたびに段階が加算されます。
 		PRINTL 　　効果量は以下の通りです。
@@ -495,6 +486,51 @@ SELECTCASE RESULT
 		PRINTL 　　バフ割合のみ効果を発揮します。
 		PRINTL 　　計算式は「（（（最大ＨＰ - ＨＰ） ✕ 200 / 最大ＨＰ）+ 100）✕（バフ効果量 / 3） / 100」％。
 		PRINTL
+		PRINTL ・追撃
+		PRINTL 　　通常攻撃を行う際、追加のダメージが発生します。
+		PRINTL 　　効果割合は通常攻撃のダメージに対する％で追加ダメージを発生させます。
+		PRINTL 　　効果固定値は設定した値で追加ダメージを発生させます。
+		PRINTL
+		PRINTL ・奥義再発動
+		PRINTL 　　奥義を発動した時、もう一度奥義を発動させます。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
+		PRINTL
+		WAIT
+		RESTART
+	CASE 500
+		バフ対象能力 = 与回復量
+	CASE 501
+		バフ対象能力 = 被回復量
+	CASE 502
+		バフ対象能力 = 再生
+	CASE 503
+		バフ対象能力 = 高揚
+	CASE 504
+		バフ対象能力 = バリア
+	CASE 505
+		バフ対象能力 = ＨＰ転換
+	CASE 506
+		バフ対象能力 = ＭＰ転換
+	CASE 507
+		バフ対象能力 = 自動復活
+	CASE 508
+		バフ対象能力 = 弱体無効
+	CASE 509
+		バフ対象能力 = ディスペルガード
+	CASE 510
+		バフ対象能力 = 単体かばう
+	CASE 511
+		バフ対象能力 = 全体かばう
+	CASE 512
+		バフ対象能力 = 反射
+	CASE 599
+		DRAWLINE
+		PRINTL ・与回復量
+		PRINTL 　　効果の掛かったキャラが使用する回復効果が上下します。
+		PRINTL
+		PRINTL ・被回復量
+		PRINTL 　　効果の掛かったキャラが受ける回復効果が上下します。
+		PRINTL
 		PRINTL ・再生
 		PRINTL 　　行動終了後にＨＰが回復します。
 		PRINTL 　　バフ固定値のみ設定可能にしています。割合は効果が大きすぎるため、アビエディタでは解放していません。
@@ -509,23 +545,45 @@ SELECTCASE RESULT
 		PRINTL 　　バリアが残っている時、追撃効果が発生しません。
 		PRINTL 　　バフ固定値のみ効果を発揮します。
 		PRINTL
-		PRINTL ・追撃
-		PRINTL 　　通常攻撃を行う際、追加のダメージが発生します。
-		PRINTL 　　効果割合は通常攻撃のダメージに対する％で追加ダメージを発生させます。
-		PRINTL 　　効果固定値は設定した値で追加ダメージを発生させます。
-		; PRINTL
-		; PRINTL ・ＨＰ転換
-		; PRINTL 　　ダメージを受ける時、代わりにＨＰを回復します。
-		; PRINTL 　　効果割合は受けるはずだったダメージに対する％で回復を発生させます。
-		; PRINTL 　　効果固定値は１回に回復する上限量を設定します。
-		; PRINTL
-		; PRINTL ・ＭＰ転換
-		; PRINTL 　　ダメージを受ける時、代わりにＭＰを回復します。
-		; PRINTL 　　効果割合は受けるはずだったダメージに対する％で回復を発生させます。
-		; PRINTL 　　効果固定値は１回に回復する上限量を設定します。
-		; PRINTL
-		; PRINTL ・自動復活
-		; PRINTL 　　
+		PRINTL ・ＨＰ転換
+		PRINTL 　　ダメージを受ける時、代わりにＨＰを回復します。
+		PRINTL 　　効果割合は受けるはずだったダメージに対する％で回復を発生させます。
+		PRINTL 　　効果固定値は１回に回復する上限量を設定します。０にすると効果を発揮しないので注意してください。
+		PRINTL
+		PRINTL ・ＭＰ転換
+		PRINTL 　　ダメージを受ける時、代わりにＭＰを回復します。
+		PRINTL 　　効果割合は受けるはずだったダメージに対する％で回復を発生させます。
+		PRINTL 　　効果固定値は１回に回復する上限量を設定します。０にすると効果を発揮しないので注意してください。
+		PRINTL
+		PRINTL ・自動復活
+		PRINTL 　　ＨＰが０になった時、自身のＨＰを回復して戦闘不能から復活します。
+		PRINTL 　　効果割合は最大ＨＰに対する％で回復量を決定します。
+		PRINTL 　　効果固定値は固定値で回復量を決定します。
+		PRINTL
+		PRINTL ・弱体無効
+		PRINTL 　　デバフ効果を与えられた時、それを無効化します。
+		PRINTL 　　弱体耐性貫通が付与されているデバフには機能しません。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
+		PRINTL
+		PRINTL ・ディスペルガード
+		PRINTL 　　バフ消去効果を与えられた時、それを無効化します。
+		PRINTL 　　阻害無視が付与されているバフ消去には機能しません。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
+		PRINTL
+		PRINTL ・単体かばう
+		PRINTL 　　全体攻撃以外の攻撃を味方が受けた時、それをかばって自分が受けます。
+		PRINTL 　　かばう無視が付与されている攻撃には機能しません。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
+		PRINTL
+		PRINTL ・全体かばう
+		PRINTL 　　攻撃を味方が受けた時、それをかばって自分が受けます。
+		PRINTL 　　かばう無視が付与されている攻撃には機能しません。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
+		PRINTL
+		PRINTL ・反射
+		PRINTL 　　攻撃を受けた時、その攻撃の対象を攻撃者に変更します。
+		PRINTL 　　阻害無視が付与されている攻撃には機能しません。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
 		PRINTL
 		WAIT
 		RESTART
@@ -679,4 +737,63 @@ SELECTCASE バフ対象能力
 		RFLAG:アビMP係数 = 100
 		;テンションは1～4しかないので計算タイプは特殊
 		RETURNF "テンション_固定値"
+	CASE "ＨＰ転換"
+		RFLAG:アビMP係数 = 100
+		;転換系は挙動が特殊なので計算タイプ別
+		RETURNF "転換_割合_固定値"
+	CASE "ＭＰ転換"
+		RFLAG:アビMP係数 = 200
+		;転換系は挙動が特殊なので計算タイプ別
+		RETURNF "転換_割合_固定値"
+	CASE "自動復活"
+		RFLAG:アビMP係数 = 100
+		;復活も一応特殊に
+		RETURNF "復活_割合_固定値"
+	CASE "弱体無効"
+		RFLAG:アビMP係数 = 100
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
+	CASE "ディスペルガード"
+		RFLAG:アビMP係数 = 80
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
+	CASE "単体かばう"
+		RFLAG:アビMP係数 = 50
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
+	CASE "全体かばう"
+		RFLAG:アビMP係数 = 90
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
+	CASE "奥義再発動"
+		RFLAG:アビMP係数 = 150
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
+	CASE "反射"
+		RFLAG:アビMP係数 = 300
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
 ENDSELECT
+
+
+	;回避反撃：回避に成功した時自属性で攻撃
+	;			効果割合：バフが掛かっているキャラの攻撃力に対する割合でダメージ量算出
+	;			効果量：固定値でダメージ量追加
+
+	;カウンター：ダメージを受けた時自属性で攻撃
+	;			効果割合：バフが掛かっているキャラの攻撃力に対する割合でダメージ量算出
+	;			効果量：固定値でダメージ量追加
+
+	;再行動：ターンの行動後、さらに行動できる
+	;			効果割合：無意味
+	;			効果量：行動の追加回数
+
+	;ガッツ：瀕死に陥る大ダメージを受けてもＨＰ1で耐える。
+	;			効果割合：効果割合：無意味
+	;			効果量：効果割合：無意味
+
+	;ブレイクアサシン：対象のCTが0の時、与ダメが2.5倍になる
+	;			効果割合、効果量ともに無意味
+
+
+
