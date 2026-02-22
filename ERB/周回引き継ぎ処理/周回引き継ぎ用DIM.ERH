@@ -34,3 +34,4 @@
 
 #DIM GLOBAL 周回後スタート地点
 
+#DIM SAVEDATA GLOBAL 引き継ぎ数記録, 10
