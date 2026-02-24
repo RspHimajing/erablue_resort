@@ -425,11 +425,14 @@ PRINTBUTTONLC "[305] 光属性耐性", 305
 PRINTBUTTONLC "[306] 闇属性耐性", 306
 PRINTL
 DRAWLINE
-PRINTL ・その他デバフ
-PRINTBUTTONLC "[400] 与回復量", 400
-PRINTBUTTONLC "[401] 被回復量", 401
+PRINTL ・その他攻撃系デバフ
 PRINTL
-PRINTBUTTONLC "[499] その他デバフ解説", 499
+DRAWLINE
+PRINTL ・その他防御系デバフ
+PRINTBUTTONLC "[500] 与回復量", 500
+PRINTBUTTONLC "[501] 被回復量", 501
+PRINTL
+PRINTBUTTONLC "[599] その他デバフ解説", 599
 PRINTL
 DRAWLINE
 PRINTL
@@ -460,11 +463,11 @@ SELECTCASE RESULT
 		デバフ対象能力 = 被ダメージ
 	CASE 301 TO 306
 		デバフ対象能力 = 属性被ダメージ_%属性数値文字列変換(RESULT - 301)%
-	CASE 400
+	CASE 500
 		デバフ対象能力 = 与回復量
-	CASE 401
+	CASE 501
 		デバフ対象能力 = 被回復量
-	CASE 499
+	CASE 599
 		DRAWLINE
 		PRINTL ・与回復量
 		PRINTL 　　効果の掛かったキャラが使用する回復効果が上下します。
