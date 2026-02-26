@@ -478,6 +478,16 @@ FOR LOCAL, 0, 14
 	ENDIF
 NEXT
 
+;恋慕対象被ってないかチェック
+FOR LOCAL, 0, VARSIZE("恋慕対象フラグ") - 1
+	SIF 恋慕対象フラグ:LOCAL == 0
+		CONTINUE
+	IF FINDELEMENT(恋慕対象フラグ, 恋慕対象フラグ:LOCAL, LOCAL + 1, VARSIZE("恋慕対象フラグ")) >= 0
+		;被ってるのでそこを削除
+		恋慕対象フラグ:(FINDELEMENT(恋慕対象フラグ, 恋慕対象フラグ:LOCAL, LOCAL + 1, VARSIZE("恋慕対象フラグ"))) = 0
+	ENDIF
+NEXT
+
 ;新しく素材アイテムが増えてないかチェック
 CALL 素材アイテム登録処理
 
