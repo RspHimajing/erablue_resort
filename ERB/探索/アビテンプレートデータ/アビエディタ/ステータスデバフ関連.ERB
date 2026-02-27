@@ -426,6 +426,9 @@ PRINTBUTTONLC "[306] 闇属性耐性", 306
 PRINTL
 DRAWLINE
 PRINTL ・その他攻撃系デバフ
+PRINTBUTTONLC "[400] 強圧", 400
+PRINTL
+PRINTBUTTONLC "[499] その他攻撃系デバフ", 499
 PRINTL
 DRAWLINE
 PRINTL ・その他防御系デバフ
@@ -436,8 +439,9 @@ PRINTBUTTONLC "[503] 麻痺", 503
 PRINTL
 PRINTBUTTONLC "[504] 睡眠", 504
 PRINTBUTTONLC "[505] 封印", 505
+PRINTBUTTONLC "[506] 恐怖", 506
 PRINTL
-PRINTBUTTONLC "[599] その他デバフ解説", 599
+PRINTBUTTONLC "[599] その他防御系デバフ", 599
 PRINTL
 DRAWLINE
 PRINTL
@@ -468,6 +472,17 @@ SELECTCASE RESULT
 		デバフ対象能力 = 被ダメージ
 	CASE 301 TO 306
 		デバフ対象能力 = 属性被ダメージ_%属性数値文字列変換(RESULT - 301)%
+	CASE 400
+		デバフ対象能力 = 強圧
+	CASE 499
+		DRAWLINE
+		PRINTL ・強圧
+		PRINTL 　　ＨＰの回復が発生しなくなります。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
+		PRINTL
+		PRINTL
+		WAIT
+		RESTART
 	CASE 500
 		デバフ対象能力 = 与回復量
 	CASE 501
@@ -480,6 +495,8 @@ SELECTCASE RESULT
 		デバフ対象能力 = 睡眠
 	CASE 505
 		デバフ対象能力 = 封印
+	CASE 506
+		デバフ対象能力 = 恐怖
 	CASE 599
 		DRAWLINE
 		PRINTL ・与回復量
@@ -492,6 +509,12 @@ SELECTCASE RESULT
 		PRINTL 　　全て同じ効果です。
 		PRINTL 　　行動開始時、一定確率で行動不能になります。
 		PRINTL 　　効果割合は行動不能になる確率を設定します。効果固定値は無意味です。
+		PRINTL
+		PRINTL ・恐怖
+		PRINTL 　　敵キャラクターに掛けた場合、通常攻撃によるチャージターン増加が発生しません。
+		PRINTL 　　特殊行動による増加は発生します。
+		PRINTL 　　味方キャラクターに掛けた場合、通常攻撃による再生・高揚による奥義ゲージ増加が発生しません。
+		PRINTL 　　効果割合・効果固定値ともに無意味です。
 		PRINTL
 		PRINTL
 		WAIT
@@ -627,6 +650,14 @@ SELECTCASE デバフ対象能力
 	CASE "魅了", "麻痺", "睡眠", "封印"
 		RFLAG:アビMP係数 = 180
 		RETURNF "最大100_割合"
+	CASE "恐怖"
+		RFLAG:アビMP係数 = 120
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
+	CASE "強圧"
+		RFLAG:アビMP係数 = 50
+		;効果が持続効果のみ系
+		RETURNF "持続のみ"
 ENDSELECT
 
 	;魅了
@@ -661,12 +692,6 @@ ENDSELECT
 	;呪い：ＨＰを回復するとき、代わりにダメージを受ける
 	;			効果割合：回復するはずだったＨＰに対する％でダメージ量増加
 	;			効果量：ダメージ上限
-
-	;強圧：ＨＰを回復することができない
-	;			効果割合、効果量：効果なし
-
-	;恐怖：通常攻撃や再生・高揚による奥義ゲージ増加/チャージターン増加が発生しない。特殊行動による増加は発生する
-	;			効果割合、効果量：効果なし
 
 	;連続攻撃率：DA率とTA率を下降補正する
 	;			効果割合：効果なし
