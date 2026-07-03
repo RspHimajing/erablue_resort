@@ -14,7 +14,7 @@
 #DIM 奥義段階
 #DIM 最大奥義段階
 #DIMS 奥義名, 5
-#DIM 消費ＭＰ, 5
+#DIM 基礎攻撃位置, 5
 #DIMS 取得条件, 5
 #DIM 表示候補数
 #DIM 選択番号
@@ -33,7 +33,7 @@ ADDCHARA 0
 表示Lv = 1
 基礎BATTLE_STATE:0:Lv = 表示Lv
 VARSET 奥義名, "（未定）"
-VARSET 消費ＭＰ, 0
+VARSET 基礎攻撃位置, -1
 VARSET 取得条件
 奥義段階 = 0
 最大奥義段階 = 0
@@ -108,7 +108,11 @@ ENDIF
 HTML文字列 += "<br>"
 HTML文字列 += "<br>"
 IF 奥義作成中フラグ
-	HTML文字列 += "<button value='997'>[997] 奥義段階を増やす</button><br>"
+	IF 最大奥義段階 < 4
+		HTML文字列 += "<button value='997'>[997] 奥義段階を増やす</button><br>"
+	ELSE
+		HTML文字列 += @"<font color='#%カラーパレット_HTML("グレーアウト")%'>[997] 奥義段階を増やす</font><br>"
+	ENDIF
 	HTML文字列 += "<br>"
 	HTML文字列 += "<button value='998'>[998] 奥義ERBを生成する</button><br>"
 ENDIF
@@ -140,6 +144,7 @@ IF 奥義作成中フラグ
 				IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:LOCAL, "アビ文字列３", 1) == "奥義基礎攻撃"
 					HTML文字列 += @"<div rect='1800, {1825 + 枠配置縦位置}, 4850, 380' padding='50,25,50' color='#101010' border='31' bcolor='#ff9292'><nobr>"
 					HTML文字列 += @"奥義基礎攻撃："
+					基礎攻撃位置:(DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "アビ段階", 1)) = DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1)
 				ELSE
 					HTML文字列 += @"<div rect='1800, {1825 + 枠配置縦位置}, 4850, 380' padding='50,25,50' color='#101010' border='31' bcolor='#C0C0C0'><nobr>"
 				ENDIF
@@ -165,19 +170,16 @@ IF 奥義作成中フラグ
 				HTML文字列 += "<br>"
 				HTML文字列 += @"<button value='{LOCAL + 100}'>[効果を変更する]</button>　　<button value='{LOCAL + 300}'>[効果を削除する]</button>　　"
 				
-				;奥義前効果を実装する前の暫定処置
-				IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:LOCAL, "アビ文字列３", 1) != "奥義基礎攻撃"
-					IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 1
-						HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
-					ELSE
-						HTML文字列 += "　　"
-					ENDIF
-					HTML文字列 += "　"
-					IF 表示候補数 > LOCAL + 1
-						HTML文字列 += @"<button value='{LOCAL + 500}'>[↓]</button>"
-					ENDIF
-					HTML文字列 += "<br>"
+				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 0
+					HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
+				ELSE
+					HTML文字列 += "　　"
 				ENDIF
+				HTML文字列 += "　"
+				IF 表示候補数 > LOCAL + 1
+					HTML文字列 += @"<button value='{LOCAL + 500}'>[↓]</button>"
+				ENDIF
+				HTML文字列 += "<br>"
 				HTML文字列 += "</div>"
 				枠配置縦位置 += 430
 			CASE "バフ効果"
@@ -217,8 +219,7 @@ IF 奥義作成中フラグ
 				HTML文字列 += "<br>"
 				HTML文字列 += @"<button value='{LOCAL + 100}'>[効果を変更する]</button>　　<button value='{LOCAL + 300}'>[効果を削除する]</button>　　"
 				
-				;奥義前効果を実装する前の暫定処置
-				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 1
+				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 0
 					HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
 				ELSE
 					HTML文字列 += "　　"
@@ -255,8 +256,7 @@ IF 奥義作成中フラグ
 				HTML文字列 += "<br>"
 				HTML文字列 += @"<button value='{LOCAL + 100}'>[効果を変更する]</button>　　<button value='{LOCAL + 300}'>[効果を削除する]</button>　　"
 				
-				;奥義前効果を実装する前の暫定処置
-				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 1
+				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 0
 					HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
 				ELSE
 					HTML文字列 += "　　"
@@ -309,8 +309,7 @@ IF 奥義作成中フラグ
 				HTML文字列 += "<br>"
 				HTML文字列 += @"<button value='{LOCAL + 100}'>[効果を変更する]</button>　　<button value='{LOCAL + 300}'>[効果を削除する]</button>　　"
 				
-				;奥義前効果を実装する前の暫定処置
-				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 1
+				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 0
 					HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
 				ELSE
 					HTML文字列 += "　　"
@@ -349,8 +348,7 @@ IF 奥義作成中フラグ
 				HTML文字列 += "<br>"
 				HTML文字列 += @"<button value='{LOCAL + 100}'>[効果を変更する]</button>　　<button value='{LOCAL + 300}'>[効果を削除する]</button>　　"
 				
-				;奥義前効果を実装する前の暫定処置
-				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 1
+				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 0
 					HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
 				ELSE
 					HTML文字列 += "　　"
@@ -379,8 +377,7 @@ IF 奥義作成中フラグ
 				HTML文字列 += "<br>"
 				HTML文字列 += @"<button value='{LOCAL + 100}'>[効果を変更する]</button>　　<button value='{LOCAL + 300}'>[効果を削除する]</button>　　"
 				
-				;奥義前効果を実装する前の暫定処置
-				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 1
+				IF DT_CELL_GET("アビエディタデータベース", 奥義ID:LOCAL, "効果順番", 1) > 0
 					HTML文字列 += @"<button value='{LOCAL + 400}'>[↑]</button>"
 				ELSE
 					HTML文字列 += "　　"
@@ -602,16 +599,16 @@ SELECTCASE 選択番号
 	CASE 203
 		;IF 消費ＭＰ:奥義段階 < 0
 			;自動＞手動
-			$MPLOOP
-			DRAWLINE
-			PRINTL 消費するＭＰの値を入力してください。
-			INPUT
-			IF RESULT < 0
-				PRINTW 負の値は指定出来ません。
-				GOTO MPLOOP
-			ELSE
-				消費ＭＰ:奥義段階 = RESULT
-			ENDIF
+			; $MPLOOP
+			; DRAWLINE
+			; PRINTL 消費するＭＰの値を入力してください。
+			; INPUT
+			; IF RESULT < 0
+			; 	PRINTW 負の値は指定出来ません。
+			; 	GOTO MPLOOP
+			; ELSE
+			; 	消費ＭＰ:奥義段階 = RESULT
+			; ENDIF
 		; ELSE
 		; 	;手動＞自動
 		; 	消費ＭＰ:奥義段階 = -1
@@ -700,18 +697,29 @@ SELECTCASE 選択番号
 		DT_SELECT "アビエディタデータベース", @"効果順番 = {LOCAL - 1}"
 		DT_CELL_SET "アビエディタデータベース", RESULT:1, "効果順番", LOCAL, 1
 		DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "効果順番", LOCAL - 1, 1
-		;もしも下に移動した効果が二番目以降不可の対象だった時、入れ替え対象だったものと効果対象を入れ替える
-		IF GROUPMATCH(DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1), "味方単体", "敵単体", "敵横列", "敵縦列")
-			LOCALS '= DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1)
-			DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", 1), 1
-			DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", LOCALS, 1
+		;もしも移動する効果が奥義基礎攻撃と入れ替わった場合、奥義前不可の対象は奥義と同じ相手に書き換える
+		LOCALS '= DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", 1)
+		IF 基礎攻撃位置:(DT_CELL_GET("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ段階", 1)) == LOCAL - 1 && GROUPMATCH(LOCALS, "味方単体", "敵単体", "敵横列", "敵縦列")
+			DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", "奥義と同じ相手", 1
 		ENDIF
-		;もしも一番上に来た効果の位置が最初、かつ対象が「上と同じ」だった場合、入れ替え対象だったものと効果対象を入れ替える
+		;もしも下に移動した効果が二番目以降不可の対象だった時、入れ替え対象だったものと効果対象を入れ替える（基礎攻撃は動かさない）
+		IF DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ文字列３", 1) != "奥義基礎攻撃"
+			IF GROUPMATCH(DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1), "味方単体", "敵単体", "敵横列", "敵縦列")
+				LOCALS '= DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1)
+				DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", 1), 1
+				DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", LOCALS, 1
+			ENDIF
+		ENDIF
+		;もしも一番上に来た効果の位置が最初、かつ対象が「上と同じ」だった場合、入れ替え対象だったものと効果対象を入れ替える（基礎攻撃との入れ替えの時は奥義と同じに書き換える）
 		LOCALS '= DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", 1)
 		IF LOCAL - 1 == 0 && LOCALS == "上と同じ相手"
-			LOCALS '= DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1)
-			DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", 1), 1
-			DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", LOCALS, 1
+			IF DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ文字列３", 1) == "奥義基礎攻撃"
+				DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", "奥義と同じ相手", 1
+			ELSE
+				LOCALS '= DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1)
+				DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", 1), 1
+				DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 400), "アビ対象", LOCALS, 1
+			ENDIF
 		ENDIF
 	CASE 500 TO 599
 		;下に移動
@@ -719,18 +727,29 @@ SELECTCASE 選択番号
 		DT_SELECT "アビエディタデータベース", @"効果順番 = {LOCAL + 1}"
 		DT_CELL_SET "アビエディタデータベース", RESULT:1, "効果順番", LOCAL, 1
 		DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 500), "効果順番", LOCAL + 1, 1
-		;もしも下に移動した効果が二番目以降不可の対象だった時、入れ替え対象だったものと効果対象を入れ替える
-		IF GROUPMATCH(DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", 1), "味方単体", "敵単体", "敵横列", "敵縦列")
-			LOCALS '= DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", 1)
-			DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1), 1
-			DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", LOCALS, 1
-		ENDIF
-		;もしも一番上に来た効果の位置が最初、かつ対象が「上と同じ」だった場合、入れ替え対象だったものと効果対象を入れ替える
+		;もしも奥義基礎攻撃が下に移動した場合、入れ替わった効果の奥義前不可の対象は奥義と同じ相手に書き換える
 		LOCALS '= DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1)
-		IF LOCAL - 1 == 0 && LOCALS == "上と同じ相手"
-			LOCALS '= DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", 1)
-			DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1), 1
-			DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", LOCALS, 1
+		IF 基礎攻撃位置:(DT_CELL_GET("アビエディタデータベース", RESULT:1, "アビ段階", 1)) == LOCAL - 1 && GROUPMATCH(LOCALS, "味方単体", "敵単体", "敵横列", "敵縦列")
+			DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", "奥義と同じ相手", 1
+		ENDIF
+		;もしも下に移動した効果が二番目以降不可の対象だった時、入れ替え対象だったものと効果対象を入れ替える（基礎攻撃は動かさない）
+		IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ文字列３", 1) != "奥義基礎攻撃"
+			IF GROUPMATCH(DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", 1), "味方単体", "敵単体", "敵横列", "敵縦列")
+				LOCALS '= DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", 1)
+				DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1), 1
+				DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", LOCALS, 1
+			ENDIF
+		ENDIF
+		;もしも一番上に来た効果の位置が最初、かつ対象が「上と同じ」だった場合、入れ替え対象だったものと効果対象を入れ替える（基礎攻撃との入れ替えの時は奥義と同じに書き換える）
+		LOCALS '= DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1)
+		IF LOCAL == 0 && LOCALS == "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ文字列３", 1) == "奥義基礎攻撃"
+				DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", "奥義と同じ相手", 1
+			ELSE
+				LOCALS '= DT_CELL_GETS("アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", 1)
+				DT_CELL_SET "アビエディタデータベース", 奥義ID:(選択番号 - 500), "アビ対象", DT_CELL_GETS("アビエディタデータベース", RESULT:1, "アビ対象", 1), 1
+				DT_CELL_SET "アビエディタデータベース", RESULT:1, "アビ対象", LOCALS, 1
+			ENDIF
 		ENDIF
 	CASE 1000 TO 1010
 		奥義段階 = 選択番号 - 1000
@@ -851,7 +870,9 @@ FOR DB行数, 0, DT_ROW_LENGTH("アビエディタデータベース")
 	SELECTCASE DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ効果種別", 1)
 		CASE "ダメージ効果"
 			奥義説明記述:奥義段階 += "<br>"
-			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "奥義と同じ相手"
+				奥義説明記述:奥義段階 += "奥義の対象に"
+			ELSEIF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
 				奥義説明記述:奥義段階 += @"%DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1)%に"
 			ENDIF
 			IF DT_CELL_GET("アビエディタデータベース", 奥義ID:DB行数, "アビ数値１", 1) > 0
@@ -901,7 +922,9 @@ FOR DB行数, 0, DT_ROW_LENGTH("アビエディタデータベース")
 			RSTR:表示設定受け渡し = 
 			CALLF アビエディタ_ＭＰ自動計算_バフ種類(DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ文字列１", 1))
 			奥義説明記述:奥義段階 += "<br>"
-			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "奥義と同じ相手"
+				奥義説明記述:奥義段階 += "奥義の対象に"
+			ELSEIF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
 				奥義説明記述:奥義段階 += @"%DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1)%に"
 			ENDIF
 			IF STRFIND(RSTR:表示設定受け渡し, "［］") >= 0
@@ -973,7 +996,9 @@ FOR DB行数, 0, DT_ROW_LENGTH("アビエディタデータベース")
 			RSTR:表示設定受け渡し = 
 			CALLF アビエディタ_ＭＰ自動計算_有利効果種類(DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ文字列１", 1))
 			奥義説明記述:奥義段階 += "<br>"
-			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "奥義と同じ相手"
+				奥義説明記述:奥義段階 += "奥義の対象に"
+			ELSEIF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
 				奥義説明記述:奥義段階 += @"%DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1)%に"
 			ENDIF
 			IF STRFIND(RSTR:表示設定受け渡し, "［］") >= 0
@@ -1035,7 +1060,9 @@ FOR DB行数, 0, DT_ROW_LENGTH("アビエディタデータベース")
 			RSTR:表示設定受け渡し = 
 			CALLF アビエディタ_ＭＰ自動計算_デバフ種類(DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ文字列１", 1))
 			奥義説明記述:奥義段階 += "<br>"
-			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "奥義と同じ相手"
+				奥義説明記述:奥義段階 += "奥義の対象に"
+			ELSEIF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
 				奥義説明記述:奥義段階 += @"%DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1)%に"
 			ENDIF
 			IF STRFIND(RSTR:表示設定受け渡し, "［］") >= 0
@@ -1110,7 +1137,9 @@ FOR DB行数, 0, DT_ROW_LENGTH("アビエディタデータベース")
 			RSTR:表示設定受け渡し = 
 			CALLF アビエディタ_ＭＰ自動計算_不利効果種類(DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ文字列１", 1))
 			奥義説明記述:奥義段階 += "<br>"
-			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "奥義と同じ相手"
+				奥義説明記述:奥義段階 += "奥義の対象に"
+			ELSEIF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
 				奥義説明記述:奥義段階 += @"%DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1)%に"
 			ENDIF
 			IF STRFIND(RSTR:表示設定受け渡し, "［］") >= 0
@@ -1178,7 +1207,9 @@ FOR DB行数, 0, DT_ROW_LENGTH("アビエディタデータベース")
 			
 		CASE "回復効果"
 			奥義説明記述:奥義段階 += "<br>"
-			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
+			IF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "奥義と同じ相手"
+				奥義説明記述:奥義段階 += "奥義の対象に"
+			ELSEIF DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1) != "上と同じ相手"
 				奥義説明記述:奥義段階 += @"%DT_CELL_GETS("アビエディタデータベース", 奥義ID:DB行数, "アビ対象", 1)%に"
 			ENDIF
 			IF DT_CELL_GET("アビエディタデータベース", 奥義ID:DB行数, "アビ数値１", 1) > 0
