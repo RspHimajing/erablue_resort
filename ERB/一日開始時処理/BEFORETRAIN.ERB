@@ -434,6 +434,7 @@ ENDIF
 #DIM レイヤー記録
 #DIM PLAYER記録
 #DIM 精液量保存
+#DIM 起こし方
 
 VARSET LOCAL
 VARSET 秘書一覧
@@ -454,6 +455,11 @@ FOR LOCAL, 1, CHARANUM
 		;秘書に従事してるキャラを一覧化
 		秘書一覧:(秘書人数) = LOCAL
 		秘書人数 += 1
+		IF 秘書起床業務
+			;起こし方を指定した秘書は選ばれやすい
+			秘書一覧:(秘書人数) = LOCAL
+			秘書人数 += 1
+		ENDIF
 	ENDIF
 NEXT
 ;疑似恋慕の恋慕化は他のものにかかわらず全員発動する
@@ -559,11 +565,46 @@ ELSEIF 秘書人数 > 0
 	起こしに来る秘書 = 秘書一覧:(RAND:秘書人数)
 	TCVAR:起こしに来る秘書:挨拶フラグ = 1
 	;秘書がいるなら起こしに来る、秘書業務なら先に起きてるはずなのでキャラの起床処理は入れない
+	;起こし方を事前に決定し口上へ投げる。使用するかどうかは口上書きさんにお任せ
+	SIF GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_授乳) && !TALENT:起こしに来る秘書:母乳体質
+		CLEARBIT 秘書起床業務:起こしに来る秘書, 起こし方_授乳
+	IF 秘書起床業務:起こしに来る秘書 && !RAND:10
+		LOCALS '= ""
+		FOR LOCAL, 0, 10
+			SIF GETBIT(秘書起床業務:起こしに来る秘書, LOCAL)
+				LOCALS += TOSTR(LOCAL)
+		NEXT
+		起こし方 = TOINT(RANDSTR(LOCALS))
+	ELSE
+		IF 陥落チェック_性的(起こしに来る秘書)
+			IF GETBIT(TALENT:起こしに来る秘書:性別, 0) && 射精可能(MASTER) && EXP:起こしに来る秘書:膣内射精絶頂経験 && EXP:起こしに来る秘書:Ｖ性交経験 > 10 && 初体験済みチェック("Ｖ挿入初体験", 起こしに来る秘書) && RAND:3 == 0
+				起こし方 = 起こし方_騎乗位
+			ELSEIF 射精可能(MASTER) && EXP:起こしに来る秘書:腸内射精絶頂経験 && EXP:起こしに来る秘書:Ａ性交経験 > 10 && 初体験済みチェック("Ａ挿入初体験", 起こしに来る秘書) && RAND:3 == 0
+				起こし方 = 起こし方_Ａ騎乗位
+			ELSEIF TALENT:起こしに来る秘書:母乳体質 && EXP:起こしに来る秘書:噴乳経験 > 10 && RAND:3 == 0
+				起こし方 = 起こし方_授乳
+			ELSEIF EXP:起こしに来る秘書:口淫経験 > 20 && EXP:起こしに来る秘書:精飲経験 > 10 && 射精可能(MASTER) && RAND:3 == 0
+				起こし方 = 起こし方_フェラチオ
+			ELSEIF EXP:起こしに来る秘書:パイズリ経験 > 20 && ABL:起こしに来る秘書:技巧 > 2 - (TALENT:起こしに来る秘書:バストサイズ) && 射精可能(MASTER) && RAND:3 == 0
+				起こし方 = 起こし方_パイズリ
+			ELSEIF EXP:起こしに来る秘書:手淫経験 > 10 && ABL:起こしに来る秘書:技巧 > 1 && 射精可能(MASTER) && RAND:3 == 0
+				起こし方 = 起こし方_手コキ
+			ELSEIF EXP:起こしに来る秘書:手淫経験 > 10 && ABL:起こしに来る秘書:技巧 > 0 && RAND:3 == 0
+				起こし方 = 起こし方_ペッティング
+			ELSEIF 初体験日取得("キス", MASTER, 起こしに来る秘書) && RAND:3 == 0
+				起こし方 = 起こし方_キス
+			ELSE
+				起こし方 = 起こし方_ノーマル
+			ENDIF
+		ELSE
+			起こし方 = 起こし方_ノーマル
+		ENDIF
+	ENDIF
 	CALL 口上変数初期化
-	TRYCALLFORM KOJO_EVENT_秘書業務_朝起こし_{NO:起こしに来る秘書}(起こしに来る秘書)
+	TRYCALLFORM KOJO_EVENT_秘書業務_朝起こし_{NO:起こしに来る秘書}(起こしに来る秘書, 起こし方)
 	IF !口上有無確認(0, 1)
 		;朝起こしの口上が無い場合に汎用文章を出す
-		IF 陥落チェック_性的(起こしに来る秘書) && GETBIT(TALENT:起こしに来る秘書:性別, 0) && 射精可能(MASTER) && EXP:起こしに来る秘書:膣内射精絶頂経験 && EXP:起こしに来る秘書:Ｖ性交経験 > 10 && 初体験済みチェック("Ｖ挿入初体験", 起こしに来る秘書) && RAND:3 == 0
+		IF 起こし方 == 起こし方_騎乗位
 			PRINTFORMW %CALLNAME:MASTER%が眠っていると、なんだか腰の辺りに重みを感じた。
 			レイヤー記録 = TFLAG:口上用画像表示番号
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "Ｖ挿入")
@@ -590,7 +631,7 @@ ELSEIF 秘書人数 > 0
 			PRINTW ペニスを咥え込んでいた…
 			SIF TALENT:起こしに来る秘書:母乳体質
 				PRINTFORMW そのさらけ出した%OPPAI_DESCRIPTION(起こしに来る秘書)%の先端からは、母乳がゆっくりと垂れ落ちている。
-			PRINTFORMW これも秘書の務めと、朝騎乗位で起こしにきてくれたようだ。
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_騎乗位) ? お願いした通り # これも秘書の務めと \@、朝騎乗位で起こしにきてくれたようだ。
 			IF TALENT:起こしに来る秘書:妊娠 && CFLAG:起こしに来る秘書:妊娠発覚 && CFLAG:起こしに来る秘書:子の父親 == MASTER
 				PRINTFORMW 朝から盛り上がっている%CALLNAME:起こしに来る秘書%に、身重の体を労るように伝えると、
 				PRINTFORMW %CALLNAME:起こしに来る秘書%は\@ TALENT:起こしに来る秘書:恋慕 ? 嬉しそうに微笑ながら、赤ちゃんもパパの愛 # 、赤ちゃんもパパのミルク \@が欲しいと呟き、前よりも激しく腰を動かしてきた…
@@ -631,7 +672,8 @@ ELSEIF 秘書人数 > 0
 			CALL TAKE_SPERM(起こしに来る秘書, MASTER, 最大射精量(MASTER) * 3)
 			CALL EXP変動記録処理(MASTER)
 			CALL EXP変動記録処理(起こしに来る秘書)
-		ELSEIF 陥落チェック_性的(起こしに来る秘書) && 射精可能(MASTER) && EXP:起こしに来る秘書:腸内射精絶頂経験 && EXP:起こしに来る秘書:Ａ性交経験 > 10 && 初体験済みチェック("Ａ挿入初体験", 起こしに来る秘書) && RAND:3 == 0
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_騎乗位
+		ELSEIF 起こし方 == 起こし方_Ａ騎乗位
 			PRINTFORMW %CALLNAME:MASTER%が眠っていると、なんだか腰の辺りに重みを感じた。
 			レイヤー記録 = TFLAG:口上用画像表示番号
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "Ａ挿入")
@@ -658,7 +700,7 @@ ELSEIF 秘書人数 > 0
 			PRINTW ペニスを咥え込んでいた…
 			SIF TALENT:起こしに来る秘書:母乳体質
 				PRINTFORMW そのさらけ出した%OPPAI_DESCRIPTION(起こしに来る秘書)%の先端からは、母乳がゆっくりと垂れ落ちている。
-			PRINTFORMW これも秘書の務めと、朝Ａ騎乗位で起こしにきてくれたようだ。
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_Ａ騎乗位) ? お願いした通り # これも秘書の務めと \@、朝Ａ騎乗位で起こしにきてくれたようだ。
 			PRINTFORMW %CALLNAME:MASTER%がそのまま射精すると、%CALLNAME:起こしに来る秘書%は腰をより強く押し付けて、うっとりとした顔でその瞬間を待っている。
 			PRINTFORMW 腸内で子種の熱を感じながら、絶頂の余韻に浸る%CALLNAME:起こしに来る秘書%は嬉しそうに目を細め、%CALLNAME:MASTER%と繋がったまま今日のスケジュールを喘ぎ声まじりで報告させた。
 			PRINTFORML Ｃ経験 + 10（%CALLNAME:MASTER%）
@@ -690,7 +732,8 @@ ELSEIF 秘書人数 > 0
 			EXP:起こしに来る秘書:奉仕快楽経験 += 3
 			CALL EXP変動記録処理(MASTER)
 			CALL EXP変動記録処理(起こしに来る秘書)
-		ELSEIF 陥落チェック_性的(起こしに来る秘書) && TALENT:起こしに来る秘書:母乳体質 && EXP:起こしに来る秘書:噴乳経験 > 10 && RAND:3 == 0
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_Ａ騎乗位
+		ELSEIF 起こし方 == 起こし方_授乳
 			PRINTFORMW %CALLNAME:MASTER%が眠っていると、なんだか口の中がミルクのような味がした。
 			レイヤー記録 = TFLAG:口上用画像表示番号
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "授乳")
@@ -707,7 +750,7 @@ ELSEIF 秘書人数 > 0
 					CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
 			ENDIF
 			PRINTFORMW 目を開けてみると、%CALLNAME:起こしに来る秘書%が母乳の垂れる%OPPAI_DESCRIPTION(起こしに来る秘書)%の先端を%CALLNAME:MASTER%の口に押し付けていた。
-			PRINTFORMW これも秘書の務めと、朝授乳で起こしにきてくれたようだ。
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_授乳) ? お願いした通り # これも秘書の務めと \@、朝授乳で起こしにきてくれたようだ。
 			PRINTFORMW %CALLNAME:MASTER%がそれに応えるように乳首を吸い上げると、%CALLNAME:起こしに来る秘書%は表情を蕩けさせ、母乳を飲む%CALLNAME:MASTER%の頭を優しく抱き締めた。
 			PRINTFORMW たっぷりと授乳プレイをした後、%CALLNAME:起こしに来る秘書%は微笑んで仕事に戻っていった。
 			EXP:起こしに来る秘書:Ｂ経験 += 5
@@ -719,7 +762,8 @@ ELSEIF 秘書人数 > 0
 			PRINTFORML 噴乳経験 + 3（%CALLNAME:起こしに来る秘書%）
 			PRINTFORML 搾乳快楽経験 + 3（%CALLNAME:起こしに来る秘書%）
 			CALL EXP変動記録処理(起こしに来る秘書)
-		ELSEIF 陥落チェック_性的(起こしに来る秘書) && EXP:起こしに来る秘書:精飲経験 > 10 && 射精可能(MASTER) && RAND:3 == 0
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_授乳
+		ELSEIF 起こし方 == 起こし方_フェラチオ
 			レイヤー記録 = TFLAG:口上用画像表示番号
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "フェラチオ")
 			CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
@@ -744,23 +788,174 @@ ELSEIF 秘書人数 > 0
 				CASEELSE
 					PRINTL 大きなペニスをなんとか口に収め、吸いたてている……
 			ENDSELECT
-			PRINTFORMW これも秘書の務めと、朝フェラで起こしにきてくれたようだ。
-			PRINTFORMW %CALLNAME:MASTER%がそのまま射精すると、%CALLNAME:起こしに来る秘書%はこぼさず飲み込んで仕事に戻っていった。
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_フェラチオ) ? お願いした通り # これも秘書の務めと \@、朝フェラで起こしにきてくれたようだ。
+			PRINTFORML %CALLNAME:MASTER%がそのまま射精すると、%CALLNAME:起こしに来る秘書%は
+			;精飲フラグ(起こしに来る秘書)で分岐させたい
+			SELECTCASE 精飲フラグ(起こしに来る秘書)
+				CASE 2
+					PRINTW 全て受け止めて飲み干すと、舌でペニスを余す所無く清めてから鈴口に軽くキスをし、仕事へ戻っていった。
+				CASE 1
+					PRINTW 口内に広がる精液の味に眉をしかめながらも、少しもこぼさず飲み込んで仕事に戻っていった。
+				CASEELSE
+					PRINTW 口に出された精液を用意していたティッシュに吐き出し、ゴミ箱に捨てて仕事に戻っていった。
+			ENDSELECT
 			PRINTFORML Ｃ経験 + 10（%CALLNAME:MASTER%）
 			PRINTFORML 絶頂経験 + 1（%CALLNAME:MASTER%）
 			PRINTFORML Ｃ絶頂経験 + 1（%CALLNAME:MASTER%）
 			PRINTFORML 射精経験 + 1（%CALLNAME:MASTER%）
 			PRINTFORML 口淫経験 + 3（%CALLNAME:起こしに来る秘書%）
-			PRINTFORML 精飲経験 + 1（%CALLNAME:起こしに来る秘書%）
+			IF 精飲フラグ(起こしに来る秘書)
+				PRINTFORML 精飲経験 + 1（%CALLNAME:起こしに来る秘書%）
+				EXP:起こしに来る秘書:精飲経験 += 1
+			ENDIF
 			WAIT
 			EXP:MASTER:Ｃ経験 += 10
 			EXP:MASTER:絶頂経験 += 1
 			EXP:MASTER:Ｃ絶頂経験 += 1
 			EXP:起こしに来る秘書:口淫経験 += 3
-			EXP:起こしに来る秘書:精飲経験 += 1
 			CALL EXP変動記録処理(MASTER)
 			CALL EXP変動記録処理(起こしに来る秘書)
-		ELSEIF GETBIT(陥落チェック_性的(起こしに来る秘書), 1) && RAND:3 == 0
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_フェラチオ
+		ELSEIF 起こし方 == 起こし方_パイズリ
+			レイヤー記録 = TFLAG:口上用画像表示番号
+			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "パイズリ")
+			CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
+			IF レイヤー記録 == TFLAG:口上用画像表示番号
+				;専用画像が表示されてないということなので、現在の服のV挿入画像を見る
+				LOCALS '= CSTR:起こしに来る秘書:短冊グラ表示切り替え用文字列
+				IF LOCALS == ""
+					SIF CSTR:起こしに来る秘書:表示グラフィックカテゴリ == ""
+						CSTR:起こしに来る秘書:表示グラフィックカテゴリ = デフォルト
+					LOCALS = %"短冊_" + CSTR:起こしに来る秘書:表示グラフィックカテゴリ%
+				ENDIF
+				SIF 差分抽出(起こしに来る秘書, "短冊_", LOCALS, "パイズリ", "")
+					CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
+			ENDIF
+			PRINTFORM %CALLNAME:MASTER%が眠っていると、なんだか
+			SELECTCASE TALENT:MASTER:男性器サイズ
+				CASE IS <= -1
+					LOCALS = 小さなペニス
+				CASE 0
+					LOCALS = ペニス
+				CASEELSE
+					LOCALS = 大きなペニス
+			ENDSELECT
+			SELECTCASE TALENT:起こしに来る秘書:バストサイズ
+				CASE IS < 0
+					PRINTW ペニスに硬いものが当たる感じがした
+					PRINTFORML 布団をめくってみると、%CALLNAME:起こしに来る秘書%が薄い胸で%CALLNAME:MASTER%の%LOCALS%を懸命に擦り上げている……
+				CASE IS > 1
+					PRINTW ペニスが柔らかいもので包まれている感じがした
+					PRINTFORML 布団をめくってみると、%CALLNAME:起こしに来る秘書%が豊満な胸で%CALLNAME:MASTER%の%LOCALS%を包み込んで擦り上げている……
+				CASEELSE
+					PRINTW 股間に柔らかな感触を感じた
+					PRINTFORML 布団をめくってみると、%CALLNAME:起こしに来る秘書%が胸で%CALLNAME:MASTER%の%LOCALS%を挟んで擦り上げている……
+			ENDSELECT
+			PRINTFORM 布団をめくってみると、%CALLNAME:起こしに来る秘書%が%CALLNAME:MASTER%の
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_パイズリ) ? お願いした通り # これも秘書の務めと \@、朝パイズリで起こしにきてくれたようだ。
+			PRINTFORML %CALLNAME:MASTER%がそのまま射精すると、%CALLNAME:起こしに来る秘書%は
+			;精飲フラグ(起こしに来る秘書)で分岐させたい
+			SELECTCASE 精飲フラグ(起こしに来る秘書)
+				CASE 2
+					IF TALENT:起こしに来る秘書:バストサイズ < 2 || !RAND:3
+						PRINTW 射精直前でペニスを口に咥えて嬉しそうに受け止め、尿道に残った分まで啜り上げて飲み干すと、そのまま仕事に戻っていった。
+					ELSE
+						PRINTW 満足そうな笑みを浮かべながら胸の谷間に溜まった精液を手で掬い飲み下すと、胸元から漂う精臭をそのままに仕事に戻っていった。
+					ENDIF
+				CASE 1
+					PRINTW バストに注がれた精液を指で掬い一口舐め取った後、ティッシュで身綺麗にしてから仕事に戻っていった。
+				CASEELSE
+					PRINTW 胸元にぶちまけられた精液をティッシュで拭うと、臭いを気にしながら仕事に戻っていった。
+			ENDSELECT
+			PRINTFORML Ｃ経験 + 10（%CALLNAME:MASTER%）
+			PRINTFORML 絶頂経験 + 1（%CALLNAME:MASTER%）
+			PRINTFORML Ｃ絶頂経験 + 1（%CALLNAME:MASTER%）
+			PRINTFORML 射精経験 + 1（%CALLNAME:MASTER%）
+			PRINTFORML パイズリ経験 + 1（%CALLNAME:起こしに来る秘書%）
+			IF 精飲フラグ(起こしに来る秘書) == 2
+				PRINTFORML 精飲経験 + 1（%CALLNAME:起こしに来る秘書%）
+				EXP:起こしに来る秘書:精飲経験 += 1
+			ENDIF
+			WAIT
+			EXP:MASTER:Ｃ経験 += 10
+			EXP:MASTER:絶頂経験 += 1
+			EXP:MASTER:Ｃ絶頂経験 += 1
+			EXP:起こしに来る秘書:パイズリ経験 += 1
+			CALL EXP変動記録処理(MASTER)
+			CALL EXP変動記録処理(起こしに来る秘書)
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_フェラチオ
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_パイズリ
+;		ELSEIF 起こし方 == 起こし方_手コキ
+;			レイヤー記録 = TFLAG:口上用画像表示番号
+;			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "パイズリ")
+;			CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
+;			IF レイヤー記録 == TFLAG:口上用画像表示番号
+;				;専用画像が表示されてないということなので、現在の服のV挿入画像を見る
+;				LOCALS '= CSTR:起こしに来る秘書:短冊グラ表示切り替え用文字列
+;				IF LOCALS == ""
+;					SIF CSTR:起こしに来る秘書:表示グラフィックカテゴリ == ""
+;						CSTR:起こしに来る秘書:表示グラフィックカテゴリ = デフォルト
+;					LOCALS = %"短冊_" + CSTR:起こしに来る秘書:表示グラフィックカテゴリ%
+;				ENDIF
+;				SIF 差分抽出(起こしに来る秘書, "短冊_", LOCALS, "パイズリ", "")
+;					CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
+;			ENDIF
+;			PRINTFORM %CALLNAME:MASTER%が眠っていると、なんだか
+;			SELECTCASE TALENT:MASTER:男性器サイズ
+;				CASE IS <= -1
+;					LOCALS = 小さなペニス
+;				CASE 0
+;					LOCALS = ペニス
+;				CASEELSE
+;					LOCALS = 大きなペニス
+;			ENDSELECT
+;			SELECTCASE TALENT:起こしに来る秘書:バストサイズ
+;				CASE IS < 0
+;					PRINTW ペニスに硬いものが当たる感じがした
+;					PRINTFORML 布団をめくってみると、%CALLNAME:起こしに来る秘書%が薄い胸で%CALLNAME:MASTER%の%LOCALS%を懸命に擦り上げている……
+;				CASE IS > 1
+;					PRINTW ペニスが柔らかいもので包まれている感じがした
+;					PRINTFORML 布団をめくってみると、%CALLNAME:起こしに来る秘書%が豊満な胸で%CALLNAME:MASTER%の%LOCALS%を包み込んで擦り上げている……
+;				CASEELSE
+;					PRINTW 股間に柔らかな感触を感じた
+;					PRINTFORML 布団をめくってみると、%CALLNAME:起こしに来る秘書%が胸で%CALLNAME:MASTER%の%LOCALS%を挟んで擦り上げている……
+;			ENDSELECT
+;			PRINTFORM 布団をめくってみると、%CALLNAME:起こしに来る秘書%が%CALLNAME:MASTER%の
+;			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_パイズリ) ? お願いした通り # これも秘書の務めと \@、朝パイズリで起こしにきてくれたようだ。
+;			PRINTFORML %CALLNAME:MASTER%がそのまま射精すると、%CALLNAME:起こしに来る秘書%は
+;			;精飲フラグ(起こしに来る秘書)で分岐させたい
+;			SELECTCASE 精飲フラグ(起こしに来る秘書)
+;				CASE 2
+;					IF TALENT:起こしに来る秘書:バストサイズ < 2 || !RAND:3
+;						PRINTW 射精直前でペニスを口に咥えて嬉しそうに受け止め、尿道に残った分まで啜り上げて飲み干すと、そのまま仕事に戻っていった。
+;					ELSE
+;						PRINTW 満足そうな笑みを浮かべながら胸の谷間に溜まった精液を手で掬い飲み下すと、胸元から漂う精臭をそのままに仕事に戻っていった。
+;					ENDIF
+;				CASE 1
+;					PRINTW バストに注がれた精液を指で掬い一口舐め取った後、ティッシュで身綺麗にしてから仕事に戻っていった。
+;				CASEELSE
+;					PRINTW 胸元にぶちまけられた精液をティッシュで拭うと、臭いを気にしながら仕事に戻っていった。
+;			ENDSELECT
+;			PRINTFORML Ｃ経験 + 10（%CALLNAME:MASTER%）
+;			PRINTFORML 絶頂経験 + 1（%CALLNAME:MASTER%）
+;			PRINTFORML Ｃ絶頂経験 + 1（%CALLNAME:MASTER%）
+;			PRINTFORML 射精経験 + 1（%CALLNAME:MASTER%）
+;			PRINTFORML パイズリ経験 + 1（%CALLNAME:起こしに来る秘書%）
+;			IF 精飲フラグ(起こしに来る秘書) == 2
+;				PRINTFORML 精飲経験 + 1（%CALLNAME:起こしに来る秘書%）
+;				EXP:起こしに来る秘書:精飲経験 += 1
+;			ENDIF
+;			WAIT
+;			EXP:MASTER:Ｃ経験 += 10
+;			EXP:MASTER:絶頂経験 += 1
+;			EXP:MASTER:Ｃ絶頂経験 += 1
+;			EXP:起こしに来る秘書:パイズリ経験 += 1
+;			CALL EXP変動記録処理(MASTER)
+;			CALL EXP変動記録処理(起こしに来る秘書)
+;			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_フェラチオ
+;			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_パイズリ
+;			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_手コキ
+		ELSEIF 起こし方 == 起こし方_ペッティング
 			PRINTFORMW %CALLNAME:MASTER%が眠っていると、体全体が快楽に包まれているような感触がする……。
 			レイヤー記録 = TFLAG:口上用画像表示番号
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "ペッティング")
@@ -778,7 +973,7 @@ ELSEIF 秘書人数 > 0
 				PLAYER = PLAYER記録
 			ENDIF
 			PRINTFORMW 目を開けてみると、%CALLNAME:起こしに来る秘書%が%CALLNAME:MASTER%の体を愛撫していた。
-			PRINTFORMW どうやら朝ペッティングで起こしにきてくれたようだ。
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_ペッティング) ? お願いした通り # どうやら \@朝ペッティングで起こしにきてくれたようだ。
 			PRINTFORMW %CALLNAME:MASTER%が起きたことに気づくと、%CALLNAME:起こしに来る秘書%は愛撫の手を速めて%CALLNAME:MASTER%を絶頂させる。
 			PRINTFORMW これも秘書の務めと微笑んで、%CALLNAME:起こしに来る秘書%は仕事に戻っていった。
 			LOCAL = 1
@@ -815,7 +1010,8 @@ ELSEIF 秘書人数 > 0
 				EXP:MASTER:絶頂経験 += LOCAL
 			WAIT
 			CALL EXP変動記録処理(MASTER)
-		ELSEIF 陥落チェック_性的(起こしに来る秘書) && 初体験日取得("キス", MASTER, 起こしに来る秘書) && RAND:3 == 0
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_ペッティング
+		ELSEIF 起こし方 == 起こし方_キス
 			PRINTFORMW %CALLNAME:MASTER%が眠っていると、唇に柔らかい感触を感じた。
 			レイヤー記録 = TFLAG:口上用画像表示番号
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "キス")
@@ -829,7 +1025,7 @@ ELSEIF 秘書人数 > 0
 				CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/コマンド実行時_%LOCALS%")
 			ENDIF
 			PRINTFORMW 目を開けてみると、%CALLNAME:起こしに来る秘書%が%CALLNAME:MASTER%の唇にキスをしている。
-			PRINTFORMW これも秘書の務めと、朝キスで起こしにきてくれたようだ。
+			PRINTFORMW \@ GETBIT(秘書起床業務:起こしに来る秘書, 起こし方_キス) ? お願いした通り # これも秘書の務めと \@、朝キスで起こしにきてくれたようだ。
 			PRINTFORMW %CALLNAME:MASTER%が起きたことに気づくと、%CALLNAME:起こしに来る秘書%は微笑んで仕事に戻っていった。
 			PRINTFORML キス経験 + 2（%CALLNAME:MASTER%）
 			PRINTFORML キス経験 + 2（%CALLNAME:起こしに来る秘書%）
@@ -838,12 +1034,14 @@ ELSEIF 秘書人数 > 0
 			EXP:起こしに来る秘書:キス経験 += 2
 			CALL EXP変動記録処理(MASTER)
 			CALL EXP変動記録処理(起こしに来る秘書)
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_キス
 		ELSE
 			CALL 汎用一枚絵画像_名称算出(起こしに来る秘書, "秘書朝起こし_", "通常")
 			CALL PRINT_STRL(@"IMAGEPATH_%CSTR:起こしに来る秘書:画像フォルダ%/%RESULTS%")
 			PRINTFORMW %CALLNAME:MASTER%が眠っていると、名前を呼ぶ声がする。
 			PRINTFORMW %CALLNAME:起こしに来る秘書%が時間通りに起こしに来てくれたようだ。
 			PRINTFORMW %CALLNAME:MASTER%が体を起こして礼を言うと、%CALLNAME:起こしに来る秘書%は仕事へと戻っていった。
+			SETBIT 秘書起床経験:起こしに来る秘書, 起こし方_ノーマル
 		ENDIF
 	ENDIF
 ENDIF
