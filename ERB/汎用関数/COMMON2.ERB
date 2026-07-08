@@ -483,10 +483,11 @@ RETURNF HAS_VAGINA(ARG)
 #FUNCTION
 #DIM 対象キャラ
 
-RFLAG:利用性別 = 0
-TRYCALLFORMF 施設利用性別登録_{NO:対象キャラ}(対象キャラ)
-SIF RFLAG:利用性別
-	RETURNF RFLAG:利用性別
+RESULT = 0
+TRYCALLFORMF 性別処理制御_{NO:対象キャラ}(対象キャラ, "入室性別")
+IF RESULT
+	RETURNF RESULT
+ENDIF
 
 ;男は男、それ以外は全部女性側がデフォルト
 IF TALENT:対象キャラ:性別 == 2
