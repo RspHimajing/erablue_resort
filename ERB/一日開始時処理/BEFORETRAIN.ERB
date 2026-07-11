@@ -10,6 +10,21 @@
 
 
 VARSET TARGET
+IF 通常キャラ招待:0 <= 0 && 自動広告文字列 != ""
+	PRINT 自動広告実行：
+	VARSET RESULTS
+	SPLIT 自動広告文字列, "-", RESULTS
+	IF RESULTS:0 == "通常の広告"
+		表示キー_右 = %RESULTS:1%
+		CALL 通常広告
+	ELSE
+		表示キー_左 = %RESULTS:0%
+		表示キー_右 = %RESULTS:1%
+		TRYCALLFORM 特殊広告_%RESULTS:0%("自動実行")
+	ENDIF
+	表示キー_左 = 
+	表示キー_右 = 
+ENDIF
 DRAWLINE
 CALL 招待キャラ来訪処理
 CALL 常連キャラ来訪処理

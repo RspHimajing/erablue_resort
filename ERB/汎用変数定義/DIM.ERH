@@ -176,6 +176,7 @@
 #DIM SAVEDATA 集客人数
 #DIM SAVEDATA ＤＭキャラ招待
 #DIM SAVEDATA サプチケキャラ招待
+#DIMS SAVEDATA 自動広告文字列
 #DIM SAVEDATA スイートルーム招待, 20
 #DIM SAVEDATA 解放キャラ招待, 100
 #DIM SAVEDATA CHARADATA 同行候補キャラ番号, 100
