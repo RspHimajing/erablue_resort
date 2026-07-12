@@ -11,13 +11,24 @@ PRINTL どのような広告を出しますか？
 PRINTFORML ・現在の所持金：%NUM_FORMAT(MONEY)%ルピ　所持ZP：%ZP所持量全文字列()%
 DRAWLINE
 PRINT ・現在の自動広告：
-IF 自動広告文字列 == ""
-	PRINTL なし
+IF OPTION変数:自動広告停止
+	PRINT 停止中
 ELSE
-	SETCOLOR カラーパレット("黄")
-	PRINTFORML %自動広告文字列%
-	RESETCOLOR
+	IF 自動広告文字列 == ""
+		PRINT なし
+	ELSE
+		SETCOLOR カラーパレット("黄")
+		PRINTFORM %自動広告文字列%
+		RESETCOLOR
+	ENDIF
 ENDIF
+PRINT 　　　
+IF OPTION変数:自動広告停止
+	PRINTBUTTON "[停止を解除]", 996
+ELSE
+	PRINTBUTTON "[停止する]", 996
+ENDIF
+PRINTL
 PRINTL 　※実行した広告が自動広告に設定されます。翌日以降、広告を実行していない時、自動で実行されます。
 PRINTL 　※スイートルーム招待、ＤＭ送付など対象を指定する広告は自動実行されません。
 DRAWLINE
@@ -205,6 +216,8 @@ SELECTCASE RESULT
 		CALL 広告システムチュートリアル
 		DRAWLINE
 		RESTART
+	CASE 996
+		INVERTBIT OPTION変数:自動広告停止, 0
 	CASE IS < 100
 		;特殊広告間の切り替え
 		表示キー_左 = %特殊広告関数保存:(RESULT - 10)%

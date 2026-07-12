@@ -1980,6 +1980,8 @@ ENDSELECT
 PRINTFORML 所持ZP:{FLAG:ZP所持量}.{(ZP小数点以下所持量 % 1000) / 100}{(ZP小数点以下所持量 % 100) / 10}{(ZP小数点以下所持量 % 10)}
 DRAWLINE
 
+CALL PRINT_STATE_弱点コマンド(対象キャラ, "9998", 15)
+HTML_PRINT @"<div rect = '5400, 0, 2500, 4375'>%RESULTS%</div>", 1
 CALL 弱点の欠片表示画面(フィルタフラグ, 対象キャラ, グレーアウト閾値, 1)
 VARSET 表示ID配列
 ARRAYCOPY "RESULT", "表示ID配列"
@@ -1994,6 +1996,8 @@ SELECTCASE 入力値
 		表示種別 = 
 		能力表示現在ページ = 0
 		RETURN 0
+	CASE 9998
+		CALL 弱点コマンド全表示(対象キャラ)
 	CASE 900
 		能力表示現在ページ --
 	CASE 901

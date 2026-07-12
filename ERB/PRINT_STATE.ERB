@@ -2115,7 +2115,7 @@ RESULTS = %LOCALS%
 RETURN STRCOUNT(LOCALS, "<br>") - 2
 
 
-@PRINT_STATE_弱点コマンド(対象キャラ, 全て表示ボタン番号 = "")
+@PRINT_STATE_弱点コマンド(対象キャラ, 全て表示ボタン番号 = "", 表示数変更 = 0)
 #DIM  対象キャラ
 #DIMS 全て表示ボタン番号
 #DIM  弱点コマンド数
@@ -2125,11 +2125,16 @@ RETURN STRCOUNT(LOCALS, "<br>") - 2
 #DIMS 弱点コマンドリスト, 8
 #DIM  看破状態リスト    , 8
 #DIM  弱点コマンド表示数
+#DIM  表示数変更
 
 HTML_TEXT = □ 弱点コマンド □---------------------<br>
 
 弱点コマンド数 = GET_WEAKCOMMAND_LIST(対象キャラ, 弱点コマンドリスト, 看破状態リスト)
-弱点コマンド表示数 = VARSIZE("弱点コマンドリスト")
+IF 表示数変更 < 1
+	弱点コマンド表示数 = VARSIZE("弱点コマンドリスト")
+ELSE
+	弱点コマンド表示数 = 表示数変更
+ENDIF
 グレーアウト中 = 0
 FOR L_CNT, 0, 弱点コマンド表示数
 	; 途中で空になったら終了
