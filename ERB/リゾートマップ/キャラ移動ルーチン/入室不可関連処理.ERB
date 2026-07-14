@@ -479,6 +479,7 @@ TRYCALLFORM 部屋施錠時_睡眠口上_{NO:睡眠キャラ}(睡眠キャラ)
 #DIM 表示フラグ
 #DIMS 呼び寄せ配列, 100
 #DIM 参加人数
+#DIM 乱入チェック
 
 ;キャラがうふふ中で施錠されてる時の表示文章を制御する
 ;まず複数人うふふ、メンツ記録は両方に入るのでどっち見てもいいはず
@@ -512,7 +513,24 @@ IF 参加人数 < 3
 		PRINTFORMW 中から%CALLNAME:対象キャラ１%と%CALLNAME:対象キャラ２%の嬌声が聞こえてくる……どうやらお楽しみ中のようだ…
 	ENDIF
 	参加人数 = 2
+	;乱入チェック
+	乱入チェック = 0
+	IF (TALENT:対象キャラ１:恋慕 && TALENT:対象キャラ２:恋慕) || (TALENT:対象キャラ１:セフレ || TALENT:対象キャラ２:セフレ)
+		;二人の場合は両方恋慕or片方セフレでOK
+		乱入チェック = 1
+	ENDIF
+ELSE
+	;乱入チェック
+	乱入チェック = 1
+	FOR LOCAL, 0, 参加人数
+		;複数人の場合は全員陥落でOK
+		IF 陥落チェック(TOINT(呼び寄せ配列:LOCAL)) == 0
+			乱入チェック = 0
+			BREAK
+		ENDIF
+	NEXT
 ENDIF
+
 
 ;一定条件で乱入可能
 IF あなた単独() == 0
@@ -522,25 +540,59 @@ IF あなた単独() == 0
 	PRINTBUTTONLC "[2] はい", 2
 	PRINTBUTTONLC "[1] いいえ", 1
 	BINPUT
-ELSEIF 参加人数 == 2 && (TALENT:対象キャラ１:恋慕 && TALENT:対象キャラ２:恋慕) || (TALENT:対象キャラ１:セフレ || TALENT:対象キャラ２:セフレ)
+ELSEIF 乱入チェック
 	PRINTL 
 	PRINTFORML 乱入しますか？
 	PRINTBUTTONLC "[0] はい", 0
 	PRINTBUTTONLC "[1] いいえ", 1
 	PRINTBUTTONLC "[2] 中の様子を覗く", 2
+	PRINTBUTTONLC "[10] 性行為に加わらず部屋に入る", 10
 	BINPUT
 	IF RESULT == 0
-		PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、%CALLNAME:対象キャラ１%と%CALLNAME:対象キャラ２%の睦み合いに乱入した。
-		CALL うふふ開始キャラ処理(対象キャラ１, "キャラ同士うふふ乱入")
-		CALL うふふ開始キャラ処理(対象キャラ２, "キャラ同士うふふ乱入")
-		;愛撫系モードは消す
-		CALL MODE_DELETE_ターゲット側("愛撫系", 対象キャラ１)
-		CALL MODE_DELETE_ターゲット側("愛撫系", 対象キャラ２)
+		IF 参加人数 < 3
+			PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、%CALLNAME:対象キャラ１%と%CALLNAME:対象キャラ２%の睦み合いに乱入した。
+		ELSE
+			PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、%CALLNAME:対象キャラ１%たちの睦み合いに乱入した。
+		ENDIF
+		FOR LOCAL, 0, 参加人数
+			CALL うふふ開始キャラ処理(TOINT(呼び寄せ配列:LOCAL), "キャラ同士うふふ乱入")
+			;愛撫系モードは消す
+			CALL MODE_DELETE_ターゲット側("愛撫系", TOINT(呼び寄せ配列:LOCAL))
+			;先に同室フラグを建てることで発覚口上をスキップする
+			CFLAG:(TOINT(呼び寄せ配列:LOCAL)):同室 = 1
+		NEXT
 
-		;先に同室フラグを建てることで発覚口上をスキップする
-		CFLAG:対象キャラ１:同室 = 1
-		CFLAG:対象キャラ２:同室 = 1
 		CFLAG:PLAYER:うふふ = 1
+		RETURN 1
+	ELSEIF RESULT == 10
+		IF 参加人数 < 3
+			PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、そっと%CALLNAME:対象キャラ１%と%CALLNAME:対象キャラ２%が睦み合う部屋に入った。
+		ELSE
+			PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、そっと%CALLNAME:対象キャラ１%たちが睦み合う部屋に入った。
+		ENDIF
+		FOR LOCAL, 0, 参加人数
+			;先に同室フラグを建てることで発覚口上をスキップする
+			CFLAG:(TOINT(呼び寄せ配列:LOCAL)):同室 = 1
+		NEXT
+
+		RETURN 1
+	ENDIF
+ELSEIF フィールド展開:うふふ目撃スルー
+	PRINTL 
+	PRINTFORML 部屋の中に入りますか？
+	PRINTBUTTONLC "[10] 性行為に加わらず部屋に入る", 10
+	PRINTBUTTONLC "[1] いいえ", 1
+	IF RESULT == 10
+		IF 参加人数 < 3
+			PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、そっと%CALLNAME:対象キャラ１%と%CALLNAME:対象キャラ２%が睦み合う部屋に入った。
+		ELSE
+			PRINTFORMW %CALLNAME:PLAYER%は合鍵で扉を開け、そっと%CALLNAME:対象キャラ１%たちが睦み合う部屋に入った。
+		ENDIF
+		FOR LOCAL, 0, 参加人数
+			;先に同室フラグを建てることで発覚口上をスキップする
+			CFLAG:(TOINT(呼び寄せ配列:LOCAL)):同室 = 1
+		NEXT
+		
 		RETURN 1
 	ENDIF
 ELSE
