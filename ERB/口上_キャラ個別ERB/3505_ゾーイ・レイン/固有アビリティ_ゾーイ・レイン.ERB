@@ -34,6 +34,7 @@ SELECTCASE ARGS
 			詳細文文字列受け渡し変数 += "<br>敵単体に［攻撃力✕75％］の自属性ダメージを2回与える。"
 			詳細文文字列受け渡し変数 += "<br>敵全体に［攻撃力✕70％］の<font color='#FDEC59'>光属性</font>ダメージを与える。"
 		ENDIF
+		RETURN 消費ＭＰ
 	CASE "アビ効果"
 		IF 基礎BATTLE_STATE:キャラ番号:Lv >= 36
 			CALL アビ汎用変数文字列リセット
@@ -129,6 +130,7 @@ SELECTCASE ARGS
 			詳細文文字列受け渡し変数 += "<br>敵全体に［攻撃力✕130％］の<font color='#FDEC59'>光属性</font>ダメージを与える。"
 			詳細文文字列受け渡し変数 += "<br>［20％］（Ｃ枠・3ターン）の防御力減少効果を与える。"
 		ENDIF
+		RETURN 消費ＭＰ
 	CASE "アビ効果"
 		IF 基礎BATTLE_STATE:キャラ番号:Lv >= 42
 			CALL アビ汎用変数文字列リセット
@@ -210,6 +212,7 @@ SELECTCASE ARGS
 			詳細文文字列受け渡し変数 += "<br>敵単体に［攻撃力✕70％］の<font color='#FDEC59'>光属性</font>ダメージを5回与える。"
 			詳細文文字列受け渡し変数 += "<br>［10％］（Ｃ枠・3ターン）の属性被ダメージ_光減少効果を与える。"
 		ENDIF
+		RETURN 消費ＭＰ
 	CASE "アビ効果"
 		IF 基礎BATTLE_STATE:キャラ番号:Lv >= 45
 			CALL アビ汎用変数文字列リセット
