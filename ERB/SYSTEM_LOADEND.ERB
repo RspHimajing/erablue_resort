@@ -477,6 +477,11 @@ FOR 対象キャラ, 1, CHARANUM
 
 	CALL LOCADEND_CHARAEVENT_ETC(対象キャラ)
 
+	;定住じゃないのに店持ってたら消す
+	IF TALENT:対象キャラ:店持ち > 0 && TALENT:対象キャラ:定住者 < 1
+		CALL 商業区退職処理(対象キャラ)
+	ENDIF
+	
 	IF CFLAG:対象キャラ:滞在期間 < 0
 		;滞在期間なしなのに部屋が出来てないかチェック
 		FOR LOCAL:1, 0, 滞在部屋拡張上限
@@ -552,6 +557,7 @@ FOR 対象キャラ, 1, CHARANUM
 			スイートルーム部屋割り配列:(CFLAG:対象キャラ:スイートルーム滞在フラグ - 100) = 
 		CFLAG:対象キャラ:スイートルーム滞在フラグ = 0
 	ENDIF
+
 NEXT
 
 PRINTL キャラクター整合性チェック完了
